@@ -1,78 +1,73 @@
-#!/bin/bash
+# set timezone
 
-# try using pacstrap for the entire install in the future, example below
-#pacstrap /mnt base
-#pacstrap /mnt base-devel
-#pacstrap /mnt linux
-#pacstrap /mnt linux-firmware
-#pacstrap /mnt linux-headers
-#pacstrap /mnt nano
-#clear
+ln -sf /usr/share/zoneinfo/Europe/Copenhagen /etc/localtime
+hwclock --systohc
 
+# generate locale and set language
 
-# install base
-sudo pacman -S --noconfirm base
-sudo pacman -S --noconfirm base-devel
-sudo pacman -S --noconfirm linux
-sudo pacman -S --noconfirm linux-firmware
-sudo pacman -S --noconfirm linux-headers
-sudo pacman -S --noconfirm linux-hardened
-sudo pacman -S --noconfirm linux-hardened-headers
-sudo pacman -S --noconfirm linux-lts
-sudo pacman -S --noconfirm linux-lts-headers
-sudo pacman -S --noconfirm linux-zen
-sudo pacman -S --noconfirm linux-zen-headers
-sudo pacman -S --noconfirm nano
+echo "LANG=en_DK.UTF-8" >> /etc/locale.conf
+echo "en_DK.UTF-8 UTF-8" >> /etc/locale.gen
+echo "KEYMAP=dk" >> /etc/vconsole.conf
+locale-gen
 
-clear
-sleep 0.5
+# set hostname
 
+echo framework > /etc/hostname
 
-# generate fstab (is this neccesary with archinstall?)
-genfstab -p -U /mnt >> /mnt/etc/fstab
+# set host information
 
-clear
-sleep 0.5
+echo "framework" >> /etc/hostname
+echo "127.0.0.1	localhost
+::1		localhost
+127.0.1.1	framework.localdomain	framework" >> /etc/hosts
 
+# mkinitcpio
+
+mkinitcpio -P
 
 # configure sudo
+
 EDITOR=nano visudo
 
-clear
-sleep 0.5
-
-
 # enable multilib
+
 sudo nano /etc/pacman.conf
 
-clear
-sleep 0.5
+# create swapfile
 
+dd if=/dev/zero of=/swapfile bs=1M count=2000 status=progress
+chmod 600 /swapfile && mkswap /swapfile && swapon /swapfile
+echo "/swapfile none swap defaults 0 0" >> /etc/fstab
 
 # update
-sudo pacman -Sy
 
-clear
-sleep 0.5
+sudo pacman -Syu
 
+# optional kernels
+
+#sudo pacman -S --noconfirm linux-hardened
+#sudo pacman -S --noconfirm linux-hardened-headers
+#sudo pacman -S --noconfirm linux-lts
+#sudo pacman -S --noconfirm linux-lts-headers
+#sudo pacman -S --noconfirm linux-zen
+#sudo pacman -S --noconfirm linux-zen-headers
 
 # install network tools
+
 sudo pacman -S --noconfirm dhcpcd
+sudo pacman -S --noconfirm dialog
 sudo pacman -S --noconfirm dosfstools
 sudo pacman -S --noconfirm mtools
 sudo pacman -S --noconfirm netctl
 sudo pacman -S --noconfirm network-manager-applet
 sudo pacman -S --noconfirm networkmanager
-sudo pacman -S --noconfirm nm-connection-editor
 sudo pacman -S --noconfirm openssh
+sudo pacman -S --noconfirm os-prober
 sudo pacman -S --noconfirm wireless_tools
 sudo pacman -S --noconfirm wpa_supplicant
 
-sleep 0.5
-clear
-
-
 # install xorg
+
 sudo pacman -S --noconfirm mesa
 sudo pacman -S --noconfirm xorg
 sudo pacman -S --noconfirm xorg-apps
@@ -80,11 +75,8 @@ sudo pacman -S --noconfirm xorg-drivers
 sudo pacman -S --noconfirm xorg-server
 sudo pacman -S --noconfirm xorg-xinit
 
-sleep 0.5
-clear
-
-
 # install packages
+
 #sudo pacman -S --noconfirm gnome-boxes
 #sudo pacman -S --noconfirm gnome-calculator
 #sudo pacman -S --noconfirm gnome-calendar
@@ -132,6 +124,7 @@ sudo pacman -S --noconfirm dkms
 sudo pacman -S --noconfirm dmenu
 sudo pacman -S --noconfirm dnsmasq
 sudo pacman -S --noconfirm dolphin-emu
+sudo pacman -S --noconfirm dos2unix
 sudo pacman -S --noconfirm dosbox
 sudo pacman -S --noconfirm dunst
 sudo pacman -S --noconfirm ebtables
@@ -177,7 +170,7 @@ sudo pacman -S --noconfirm grep
 sudo pacman -S --noconfirm grilo-plugins
 sudo pacman -S --noconfirm groff
 sudo pacman -S --noconfirm grsync
-sudo pacman -S --noconfirm grub
+#sudo pacman -S --noconfirm grub
 sudo pacman -S --noconfirm gst-plugin-pipewire
 sudo pacman -S --noconfirm gtop
 sudo pacman -S --noconfirm gvfs
@@ -255,7 +248,6 @@ sudo pacman -S --noconfirm qjackctl
 sudo pacman -S --noconfirm qt5-base
 sudo pacman -S --noconfirm qt5ct
 sudo pacman -S --noconfirm qt6-base
-sudo pacman -S --noconfirm qtile
 sudo pacman -S --noconfirm refind
 sudo pacman -S --noconfirm retroarch
 sudo pacman -S --noconfirm rofi
@@ -363,33 +355,21 @@ sudo pacman -S --noconfirm xorg-xvinfo
 sudo pacman -S --noconfirm xorg-xwd
 sudo pacman -S --noconfirm xorg-xwininfo
 sudo pacman -S --noconfirm xorg-xwud
-sudo pacman -S --noconfirm xterm
 sudo pacman -S --noconfirm zram-generator
 sudo pacman -S --noconfirm zsh
 
-clear
-sleep 1
+# xmonad
 
+#sudo pacman -S --noconfirm xmobar
+#sudo pacman -S --noconfirm xmonad
+#sudo pacman -S --noconfirm xmonad-contrib
 
-# window manager
-sudo pacman -S --noconfirm xmobar
-sudo pacman -S --noconfirm xmonad
-sudo pacman -S --noconfirm xmonad-contrib
+# qtile
 
-clear
-sleep 1.5
+#sudo pacman -S --noconfirm qtile
 
+# install nvidia gpu
 
-# create swapfile
-dd if=/dev/zero of=/swapfile bs=1M count=2000 status=progress
-chmod 600 /swapfile && mkswap /swapfile && swapon /swapfile
-echo "/swapfile none swap defaults 0 0" >> /etc/fstab
-
-clear
-sleep 1
-
-
-# install gpu
 sudo pacman -S --noconfirm lib32-mesa
 sudo pacman -S --noconfirm lib32-nvidia-utils
 sudo pacman -S --noconfirm lib32-vulkan-icd-loader
@@ -401,92 +381,104 @@ sudo pacman -S --noconfirm nvidia-utils
 sudo pacman -S --noconfirm opencl-nvidia
 sudo pacman -S --noconfirm vulkan-icd-loader
 
-clear
-sleep 1.5
+# install amd gpu
+
+
+# install intel gpu
 
 
 # install audio
+
 sudo pacman -S --noconfirm easyeffects
+sudo pacman -S --noconfirm lib32-pipewire
 sudo pacman -S --noconfirm pavucontrol
 sudo pacman -S --noconfirm pipewire
 sudo pacman -S --noconfirm pipewire-alsa
+sudo pacman -S --noconfirm pipewire-audio
 sudo pacman -S --noconfirm pipewire-jack
+sudo pacman -S --noconfirm pipewire-media-session
 sudo pacman -S --noconfirm pipewire-pulse
-
-clear
-sleep 1.5
-
+sudo pacman -S --noconfirm pipewire-zeroconf 
 
 # enable systems
+
+systemctl enable NetworkManager
 systemctl enable bluetooth
 systemctl enable dhcpcd
+systemctl enable gdm
 systemctl enable libvirtd
+#systemctl enable lightdm
 systemctl enable networkmanager
 systemctl enable sshd
 systemctl enable tor
-
-clear
-sleep 1.5
-
+#refind-install
 
 #Virsh
+
 sudo virsh -c qemu:///system net-autostart default
-sleep 0.5
 sudo virsh -c qemu:///system net-start default
-sleep 0.5
-
-clear
-sleep 0.5
-
 
 # update
-sudo pacman -Sy
 
-clear
-sleep 0.5
+sudo pacman -Syu
 
-
-#pipewire
-
-#pip
-#pip install streamdeck
-#sleep 0.5
-#pip3 install streamdeck-ui --user
-
-#sleep 0.5
-#clear
-
-
-#git
+#get yay
 
 #git clone https://aur.archlinux.org/yay.git
-#sleep 0.5
 #cd yay
-#sleep 0.5
 #makepkg -si
-#sleep 0.5
 #cd ..
-#sleep 0.5
 #sudo rm -r yay
-#sleep 0.5
-#clear
-#sleep 0.5
+
+# Get lightdm glorious theme
+
+#git clone https://aur.archlinux.org/lightdm-webkit2-theme-glorious.git
+#cd lightdm-webkit2-theme-glorious
+#makepkg -sri
+#cd ..
+#sudo rm -r lightdm-webkit2-theme-glorious
+
+# lightdm theme settings
+
+#sudo nano /etc/lightdm/lightdm.conf
+#sudo nano /etc/lightdm/lightdm-webkit2-greeter.conf
+
+# Grub fallout theme
+
+#wget -P /tmp https://github.com/shvchk/fallout-grub-theme/raw/master/install.sh
+#bash /tmp/install.sh
+
+# Aur packages
+
+#yay -S --noconfirm cylon
+#yay -S --noconfirm debtap
+#yay -S --noconfirm goverlay-git
+#yay -S --noconfirm lib32-mangohud
+#yay -S --noconfirm mangohud
+#yay -S --noconfirm mangohud-git
+#yay -S --noconfirm openrazer-meta
+#yay -S --noconfirm polychromatic-git
+#yay -S --noconfirm protontricks
+#yay -S --noconfirm replay-sorcery
+#yay -S --noconfirm snapd
+#yay -S --noconfirm songrec
+#yay -S --noconfirm steam-metadata-editor-git
+#yay -S --noconfirm suru-plus-aspromauros-git
+#yay -S --noconfirm teamviewer
+
+#nerdfonts
 
 #git clone https://github.com/ryanoasis/nerd-fonts
-#sleep 0.5
 #cd nerd-fonts
-#sleep 0.5
 #./install.sh
-#sleep 0.5
 #cd ..
-#sleep 0.5
 #sudo rm -r nerd-fonts
-#sleep 0.5
-#clear
-#sleep 0.5
+
 
 #TEMP REMOVED
+
 #AUR
+
 #yay -S --noconfirm debtap
 #yay -S --noconfirm lib32-mangohud
 #yay -S --noconfirm mangohud
@@ -500,61 +492,48 @@ sleep 0.5
 #yay -S --noconfirm songrec
 #yay -S --noconfirm steam-metadata-editor-git
 #yay -S --noconfirm suru-plus-aspromauros-git
-#sleep 0.5
+
+# create user
+
+useradd -g users -G wheel,audio,video,storage,power,kvm,libvirt -m mob
+\passwd mob
 
 #add user to groups
-sudo usermod -a -G wheel,ftp,sudo,audio,video,storage,power,kvm,libvirt,plugdev molkot
 
-clear
-sleep 0.5
-
+#sudo usermod -a -G wheel,ftp,sudo,audio,video,storage,power,kvm,libvirt,plugdev mob
 
 #copy dotfiles to new Install
-#sudo mkdir /home/molkot/.local
-#sleep 0.5
-#sudo mkdir /home/molkot/.local/share
-#sleep 0.5
-#sudo mkdir /home/molkot/.local/share/Steam
-#sleep 0.5
-#sudo mkdir /home/molkot/.local/share/Steam/skins
-#sleep 0.5
-#sudo mkdir /home/molkot/.config
-#sleep 0.5
-#sudo cp /install/.bashrc /home/molkot/
-#sleep 0.5
-#sudo cp /install/.xinitrc /home/molkot/
-#sleep 0.5
-#sudo cp -r /install/.xmonad /home/molkot/.xmonad
-#sleep 0.5
+
+#sudo mkdir /home/mob/.local
+#sudo mkdir /home/mob/.local/share
+#sudo mkdir /home/mob/.local/share/Steam
+#sudo mkdir /home/mob/.local/share/Steam/skins
+#sudo mkdir /home/mob/.config
+#sudo cp /install/.bashrc /home/mob/
+#sudo cp /install/.xinitrc /home/mob/
+#sudo cp -r /install/.xmonad /home/mob/.xmonad
 #sudo cp /install/xorg.conf /etc/X11/
-#sleep 0.5
-#sudo cp -r /install/Top-Right /home/molkot/.local/share/Steam/skins/
-#sleep 0.5
-#sudo cp -r /install/xmobar /home/molkot/.config/
-#sleep 0.5
-#sudo cp -r /install/applications /home/molkot/.local/share/
-#sleep 0.5
-#sudo cp -r /install/dunst /home/molkot/.config/
-#sleep 0.5
-#sudo cp -r /install/picom /home/molkot/.config/
-#sleep 0.5
-#sudo cp -r /install/rofi /home/molkot/.config/
-#sleep 0.5
-#sudo cp -r /install/yuzu /home/molkot/.local/share/
-#sleep 0.5
-#sudo cp -r /install/chatterino /home/molkot/.local/share/
-#sleep 0.5
+#sudo cp -r /install/Top-Right /home/mob/.local/share/Steam/skins/
+#sudo cp -r /install/xmobar /home/mob/.config/
+#sudo cp -r /install/applications /home/mob/.local/share/
+#sudo cp -r /install/dunst /home/mob/.config/
+#sudo cp -r /install/picom /home/mob/.config/
+#sudo cp -r /install/rofi /home/mob/.config/
+#sudo cp -r /install/yuzu /home/mob/.local/share/
+#sudo cp -r /install/chatterino /home/mob/.local/share/
 
-#sudo rm -r install
-#sleep 0.5
+#delete folder
 
-#TEMP REMOVED
 #remove install folder
 #sudo rm -r /install
-#clear
-#sleep 0.5
+
+# delete files
+
+#rm install.sh
 
 # let user know that the install finished
+
+echo
 echo DING DING DIIIING!
 echo Install is complete!
 echo
