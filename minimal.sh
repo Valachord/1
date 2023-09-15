@@ -26,10 +26,10 @@ echo "en_DK.UTF-8 UTF-8" >> /etc/locale.gen
 echo "KEYMAP=dk" >> /etc/vconsole.conf
 locale-gen
 
-echo "minimal" >> /etc/hostname
+echo "framework" >> /etc/hostname
 echo "127.0.0.1	localhost
 ::1		localhost
-127.0.1.1   minimal.localdomain minimal" >> /etc/hosts
+127.0.1.1   framework.localdomain framework" >> /etc/hosts
 
 mkinitcpio -P
 
